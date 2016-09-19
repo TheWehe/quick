@@ -31,9 +31,7 @@ namespace ast {
 	}
 	
 	VariableHandle AssignNode::eval(VariableMgr& mgr, Scope& scope) const {
-		auto ah = a->eval(mgr, scope);
-		ah = b->eval(mgr, scope);
-		return ah;
+		return VariableHandle();
 	}
 	
 	VariableHandle AddNode::eval(VariableMgr& mgr, Scope& scope) const {

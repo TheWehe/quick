@@ -2,10 +2,11 @@
 #define TOKENIZER_HPP
 
 #include <vector>
+#include <string>
 
 enum TokenType {
+	TT_NONE,
 	TT_NAME,
-	
 	TT_NULL,
 	TT_PINF,
 	TT_NINF,
@@ -13,20 +14,24 @@ enum TokenType {
 	TT_FLOAT,
 	TT_BOOL,
 	TT_STRING,
-	
 	TT_EQUAL,
 	TT_PLUS,
 	TT_MINUS,
 	TT_STAR,
 	TT_SLASH,
-	
-	TT_ENDLINE,
+	TT_NEWLINE,
 	TT_TAB
 };
 
 struct Token {
-	TokenType type;
+	Token() = default;
+	explicit Token(TokenType type) : type(type) {}
+	explicit Token(int i) : type(TT_INT), i(i) {}
+	explicit Token(float f) : type(TT_FLOAT), f(f) {}
+	explicit Token(bool b) : type(TT_BOOL), b(b) {}
+	explicit Token(TokenType type, char* s) : type(type), s(s) {}
 	
+	TokenType type = TT_NONE;
 	union {
 		int i;
 		float f;
@@ -40,13 +45,16 @@ public:
 	~Tokenizer();
 	
 	void tokenize(const std::string& code);
-	Token* getNextToken(bool peek = false);
+	void nextToken();
+	const Token& peekToken() const;
+	const Token& getCurToken() const;
 	
 private:
 	void clear();
 	
+	Token nullToken;
 	std::vector<Token> tokens;
-	int cur = 0;
+	unsigned cur = 0;
 };
 
 #endif

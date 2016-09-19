@@ -4,22 +4,16 @@
 #include "scope.hpp"
 #include "tokenizer.hpp"
 #include "ast.hpp"
+#include "parser.hpp"
 
 
 int main() {
 	VariableMgr mgr;
 	Scope scope(nullptr);
+	Parser parser;
 	
-	scope.add("x", mgr.createInt(50));
+	auto program = parser.parse("x = 5");
+	auto result = program->eval(mgr, scope);
 	
-	Token token;
-	token.type = TT_FLOAT;
-	token.f = -45.25f;
-	
-	auto program = ast::NodePtr(new ast::DivNode(
-		ast::NodePtr(new ast::VariableNode("x")), 
-		ast::NodePtr(new ast::PrimitiveNode(token))
-	));
-	
-	std::cout << program->eval(mgr, scope).asFloat() << std::endl;
+	std::cout << scope.find("x").getType() << std::endl;
 }
