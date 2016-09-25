@@ -1,22 +1,35 @@
 #include "scope.hpp"
 
-#include <iostream> // temp
 
-
-VariableHandle Scope::find(const std::string& name) const {
-	auto found = namedVars.find(name);
-	
-	if(found != namedVars.end()) {
-		std::cout << "a"; // temp
-		return found->second;
+Scope::~Scope() {
+	for (auto& x : namedVars) {
+		mgr.destroy(x.second);
 	}
-	else if(parent != nullptr) {
-		return parent->find(name);
-	}
-	
-	return VariableHandle();
 }
 
-void Scope::add(const std::string& name, VariableHandle var) {
-	namedVars.insert(std::pair<std::string, VariableHandle>(name, var));
+void Scope::add(const std::string& name, VariableHandle* h) {
+	namedVars.insert(std::pair<std::string, VariableHandle*>(name, h));
+}
+
+VariableHandle* Scope::find(const std::string& name) {
+	auto found = namedVars.find(name);
+
+	if (found == namedVars.end()) {
+		if (parent != nullptr) {
+			return parent->find(name);
+		}
+	}
+	else {
+		return mgr.createRef(found->second);
+	}
+
+	return nullptr;
+}
+
+void Scope::destroy(const std::string& name) {
+	auto found = namedVars.find(name);
+
+	if (found != namedVars.end()) {
+		mgr.destroy(found->second);
+	}
 }

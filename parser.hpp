@@ -13,7 +13,6 @@ private:
 	
 	ast::NodePtr assignment();
 	ast::NodePtr addition();
-	ast::NodePtr multiplication();
 	ast::NodePtr primitive();
 	
 	Tokenizer tok;

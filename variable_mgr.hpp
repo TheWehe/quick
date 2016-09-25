@@ -1,28 +1,24 @@
-#ifndef VARIABLE_MGR
-#define VARIABLE_MGR
+#ifndef VARIABLE_MGR_HPP
+#define VARIABLE_MGR_HPP
 
-#include <string>
 #include <vector>
 #include <stack>
+#include <list>
 
 enum DataType {
 	DT_NULL,
-	DT_PINF,
-	DT_NINF,
 	DT_INT,
-	DT_FLOAT,
-	DT_BOOL,
-	DT_STRING,
-	//DT_ARRAY
-};
-
-struct VariableData {
-	DataType type = DT_NULL;
-	unsigned refCount = 0;
-	void* data = nullptr;
+	DT_REF
 };
 
 class VariableHandle;
+
+struct VariableData {
+	DataType type = DT_NULL;
+	void* data = nullptr;
+	VariableHandle* originalRef;
+	std::list<VariableHandle*> refs;
+};
 
 class VariableMgr {
 	friend class VariableHandle;
@@ -30,26 +26,25 @@ class VariableMgr {
 public:
 	VariableMgr() = default;
 	VariableMgr(const VariableMgr& rhs) = delete;
-	VariableMgr(VariableMgr&& rhs) = delete;
 	VariableMgr& operator=(const VariableMgr& rhs) = delete;
+	VariableMgr(VariableMgr&& rhs) = delete;
 	VariableMgr& operator=(VariableMgr&& rhs) = delete;
+	~VariableMgr();
 	
-	VariableHandle createNull();
-	VariableHandle createPInf();
-	VariableHandle createNInf();
-	VariableHandle createInt(int i);
-	VariableHandle createFloat(float f);
-	VariableHandle createBool(bool b);
-	VariableHandle createString(const std::string& s);
-	VariableHandle createString(std::string&& s);
-	/*VariableHandle createArray(const std::vector<VariableHandle>& a);
-	VariableHandle createArray(std::vector<VariableHandle>&& a);*/
+	VariableHandle* createNull();
+	VariableHandle* createInt(int i);
+	VariableHandle* createCopy(VariableHandle* target);
+	VariableHandle* createRef(VariableHandle* target);
+	void destroy(VariableHandle* h);
 	
 private:
-	VariableHandle create();
-	void increaseRef(int index);
-	void decreaseRef(int index);
-	
+	VariableHandle* create();
+	void addRef(VariableHandle* target, VariableHandle* ref);
+	void destroyRef(VariableHandle* target, VariableHandle* ref, bool deleteHandle = true);
+	void assign(VariableHandle* target, VariableHandle* toCopy);
+	DataType getType(VariableHandle* h);
+	int& asInt(VariableHandle* h);
+
 	std::vector<VariableData> dataSlots;
 	std::stack<unsigned> freeSlots;
 };

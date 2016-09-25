@@ -1,25 +1,22 @@
 #ifndef SCOPE_HPP
 #define SCOPE_HPP
 
-#include <string>
-#include <map>
 #include "variable_handle.hpp"
+#include <map>
 
 class Scope {
 public:
-	Scope(Scope* parent) : parent(parent) {}
-	Scope(const Scope& rhs) = delete;
-	Scope(Scope&& rhs) = delete;
-	Scope& operator=(const Scope& rhs) = delete;
-	Scope& operator=(Scope&& rhs) = delete;
-	
-	VariableHandle find(const std::string& name) const;
-	void add(const std::string& name, VariableHandle var);
-	Scope* getParent() const { return parent; }
-	
+	Scope(VariableMgr& mgr, Scope* parent) :mgr(mgr), parent(parent) {}
+	~Scope();
+
+	void add(const std::string& name, VariableHandle* h);
+	VariableHandle* find(const std::string& name);
+	void destroy(const std::string& name);
+
 private:
-	Scope* parent = nullptr;
-	std::map<std::string, VariableHandle> namedVars;
+	VariableMgr& mgr;
+	Scope* parent;
+	std::map<std::string, VariableHandle*> namedVars;
 };
 
 #endif

@@ -1,81 +1,67 @@
 #include "variable_mgr.hpp"
 
-#include <iostream>
-#include <memory>
 #include "variable_handle.hpp"
+#include <algorithm>
 
 
-VariableHandle VariableMgr::createNull() {
-	auto handle = create();
-	handle.setType(DT_NULL);
-	return handle;
+VariableMgr::~VariableMgr() {
+	for (auto& x : dataSlots) {
+		if (x.originalRef != nullptr) delete x.originalRef;
+	}
 }
 
-VariableHandle VariableMgr::createPInf() {
-	auto handle = create();
-	handle.setType(DT_PINF);
-	return handle;
+VariableHandle* VariableMgr::createNull() {
+	auto h = create();
+	dataSlots[h->index].type = DT_NULL;
+
+	return h;
 }
 
-VariableHandle VariableMgr::createNInf() {
-	auto handle = create();
-	handle.setType(DT_NINF);
-	return handle;
+VariableHandle* VariableMgr::createInt(int i) {
+	auto h = create();
+	dataSlots[h->index].type = DT_INT;
+	dataSlots[h->index].data = new int(i);
+
+	return h;
 }
 
-VariableHandle VariableMgr::createInt(int i) {
-	auto handle = create();
-	handle.setType(DT_INT);
-	dataSlots[handle.index].data = new int(i);
-	return handle;
+VariableHandle* VariableMgr::createCopy(VariableHandle* target) {
+	auto h = create();
+	dataSlots[h->index].type = target->getType();
+
+	switch (dataSlots[h->index].type) {
+	case DT_INT: dataSlots[h->index].data = new int(target->asInt()); break;
+	default: break;
+	}
+
+	return h;
 }
 
-VariableHandle VariableMgr::createFloat(float f) {
-	auto handle = create();
-	handle.setType(DT_FLOAT);
-	dataSlots[handle.index].data = new float(f);
-	return handle;
+VariableHandle* VariableMgr::createRef(VariableHandle* target) {
+	auto h = create();
+	dataSlots[h->index].type = DT_REF;
+
+	if (dataSlots[target->index].type != DT_REF) {
+		dataSlots[h->index].data = new int(target->index);
+		addRef(target, h);
+	}
+	else {
+		int targetIndex = *static_cast<int*>(dataSlots[target->index].data);
+		dataSlots[h->index].data = new int(targetIndex);
+		dataSlots[targetIndex].refs.push_back(h);
+	}
+
+	return h;
 }
 
-VariableHandle VariableMgr::createBool(bool b) {
-	auto handle = create();
-	handle.setType(DT_BOOL);
-	dataSlots[handle.index].data = new bool(b);
-	return handle;
+void VariableMgr::destroy(VariableHandle* h) {
+	destroyRef(h, h);
 }
 
-VariableHandle VariableMgr::createString(const std::string& s) {
-	auto handle = create();
-	handle.setType(DT_STRING);
-	dataSlots[handle.index].data = new std::string(s);
-	return handle;
-}
-
-VariableHandle VariableMgr::createString(std::string&& s) {
-	auto handle = create();
-	handle.setType(DT_STRING);
-	dataSlots[handle.index].data = new std::string(std::move(s));
-	return handle;
-}
-
-/*VariableHandle VariableMgr::createArray(const std::vector<VariableHandle>& a) {
-	auto handle = create();
-	handle.setType(DT_ARRAY);
-	dataSlots[handle.index].data = new std::vector<VariableHandle>(a);
-	return handle;
-}
-
-VariableHandle VariableMgr::createArray(std::vector<VariableHandle>&& a) {
-	auto handle = create();
-	handle.setType(DT_ARRAY);
-	dataSlots[handle.index].data = new std::vector<VariableHandle>(std::move(a));
-	return handle;
-}*/
-
-VariableHandle VariableMgr::create() {
+VariableHandle* VariableMgr::create() {
 	int index;
-	
-	if(freeSlots.empty()) {
+
+	if (freeSlots.empty()) {
 		dataSlots.push_back(VariableData());
 		index = dataSlots.size() - 1;
 	}
@@ -83,29 +69,91 @@ VariableHandle VariableMgr::create() {
 		index = freeSlots.top();
 		freeSlots.pop();
 	}
-	
-	return VariableHandle(this, index);
+
+	dataSlots[index].originalRef = new VariableHandle();
+	dataSlots[index].originalRef->owner = this;
+	dataSlots[index].originalRef->index = index;
+
+	return dataSlots[index].originalRef;
 }
 
-void VariableMgr::increaseRef(int index) {
-	dataSlots[index].refCount++;
+void VariableMgr::addRef(VariableHandle* target, VariableHandle* ref) {
+	dataSlots[target->index].refs.push_back(ref);
 }
 
-void VariableMgr::decreaseRef(int index) {
-	dataSlots[index].refCount--;
-	
-	if(dataSlots[index].refCount == 0) {
-		switch(dataSlots[index].type) {
+void VariableMgr::destroyRef(VariableHandle* target, VariableHandle* ref, bool deleteHandle) {
+	int index = target->index;
+
+	if (target == ref) {
+		if(deleteHandle) delete dataSlots[index].originalRef;
+		dataSlots[index].originalRef = nullptr;
+	}
+	else {
+		dataSlots[index].refs.remove(ref);
+	}
+
+	if (dataSlots[index].originalRef == nullptr &&
+		dataSlots[index].refs.size() == 0) {
+		
+		switch (dataSlots[index].type) {
+		case DT_REF:
+			destroyRef(&VariableHandle(this, *static_cast<int*>(dataSlots[index].data)), target);
 		case DT_INT: delete static_cast<int*>(dataSlots[index].data); break;
-		case DT_FLOAT: delete static_cast<float*>(dataSlots[index].data); break;
-		case DT_BOOL: delete static_cast<bool*>(dataSlots[index].data); break;
-		case DT_STRING: delete static_cast<std::string*>(dataSlots[index].data); break;
-		//case DT_ARRAY: delete static_cast<std::vector<VariableHandle>*>(dataSlots[index].data); break;
 		default: break;
 		}
-		
+
 		dataSlots[index].type = DT_NULL;
 		dataSlots[index].data = nullptr;
+		dataSlots[index].originalRef = nullptr;
+
 		freeSlots.push(index);
 	}
+}
+
+void VariableMgr::assign(VariableHandle* target, VariableHandle* toCopy) {
+	if (dataSlots[target->index].type == DT_REF) {
+		int refIndex = *static_cast<int*>(dataSlots[target->index].data);
+
+		switch (dataSlots[refIndex].type) {
+		case DT_INT:
+			delete static_cast<int*>(dataSlots[refIndex].data);
+			break;
+		default: break;
+		}
+
+		switch (toCopy->getType()) {
+		case DT_INT:
+			dataSlots[refIndex].data = new int(toCopy->asInt());
+			break;
+		default: break;
+		}
+
+		dataSlots[refIndex].type = toCopy->getType();
+	}
+	else {
+		auto h = createCopy(toCopy);
+		VariableHandle* t = target;
+
+		destroyRef(target, target, false);
+
+		t->index = h->index;
+		t->owner = h->owner;
+
+		dataSlots[h->index].originalRef = t;
+
+		delete h;
+	}
+}
+
+DataType VariableMgr::getType(VariableHandle* h) {
+	if (dataSlots[h->index].type == DT_REF) return dataSlots[*static_cast<int*>(dataSlots[h->index].data)].type;
+	else return dataSlots[h->index].type;
+}
+
+int& VariableMgr::asInt(VariableHandle* h) {
+	void* data;
+	if (dataSlots[h->index].type == DT_REF) data = dataSlots[*static_cast<int*>(dataSlots[h->index].data)].data;
+	else data = dataSlots[h->index].data;
+
+	return *static_cast<int*>(data);
 }

@@ -8,30 +8,23 @@ class VariableHandle {
 	
 public:
 	VariableHandle() = default;
-	VariableHandle(const VariableHandle& rhs) 
-		: owner(rhs.owner), index(rhs.index) { if(index != -1) owner->increaseRef(index); }
+	VariableHandle(const VariableHandle& rhs) = delete;
+	VariableHandle& operator=(const VariableHandle& rhs) = delete;
 	VariableHandle(VariableHandle&& rhs)
 		: owner(rhs.owner), index(rhs.index) { rhs.owner = nullptr; rhs.index = -1; }
-	~VariableHandle() { if(index != -1) owner->decreaseRef(index); }
-	VariableHandle& operator=(const VariableHandle& rhs)
-		{ owner = rhs.owner; index = rhs.index; if(index != -1) owner->decreaseRef(index); return *this; }
 	VariableHandle& operator=(VariableHandle&& rhs)
 		{ owner = rhs.owner; index = rhs.index; rhs.owner = nullptr; rhs.index = -1; return *this; }
 	
-	bool isValid() const { return index != -1; }
-	void setType(DataType type) { owner->dataSlots[index].type = type; }
-	DataType getType() const { return owner->dataSlots[index].type; }
-	int& asInt() { return *static_cast<int*>(owner->dataSlots[index].data); }
-	float& asFloat() { return *static_cast<float*>(owner->dataSlots[index].data); }
-	bool& asBool() { return *static_cast<bool*>(owner->dataSlots[index].data); }
-	std::string& asString() { return *static_cast<std::string*>(owner->dataSlots[index].data); }
-	std::vector<VariableHandle>& asArray()
-		{ return *static_cast<std::vector<VariableHandle>*>(owner->dataSlots[index].data); }
-	
+	bool isValid() const { return index != -1 && owner != nullptr; }
+	VariableMgr* getOwner() const { return owner; }
+
+	void assign(VariableHandle* h) { owner->assign(this, h); }
+	DataType getType() { return owner->getType(this); }
+	int& asInt() { return owner->asInt(this); }
+
 private:
-	VariableHandle(VariableMgr* owner, int index)
-		: owner(owner), index(index) { if(index != -1) owner->increaseRef(index); }
-	
+	VariableHandle(VariableMgr* owner, int index) : owner(owner), index(index) {}
+
 	VariableMgr* owner = nullptr;
 	int index = -1;
 };

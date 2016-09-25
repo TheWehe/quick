@@ -29,8 +29,8 @@ struct Token {
 	explicit Token(int i) : type(TT_INT), i(i) {}
 	explicit Token(float f) : type(TT_FLOAT), f(f) {}
 	explicit Token(bool b) : type(TT_BOOL), b(b) {}
-	explicit Token(TokenType type, char* s) : type(type), s(s) {}
-	
+	Token(TokenType type, char* s) : type(type), s(s) {}
+
 	TokenType type = TT_NONE;
 	union {
 		int i;
@@ -43,15 +43,15 @@ struct Token {
 class Tokenizer {
 public:
 	~Tokenizer();
-	
+
 	void tokenize(const std::string& code);
 	void nextToken();
 	const Token& peekToken() const;
 	const Token& getCurToken() const;
-	
+
 private:
 	void clear();
-	
+
 	Token nullToken;
 	std::vector<Token> tokens;
 	unsigned cur = 0;
