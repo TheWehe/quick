@@ -17,10 +17,14 @@ public:
 	
 	bool isValid() const { return index != -1 && owner != nullptr; }
 	VariableMgr* getOwner() const { return owner; }
-
+	
 	void assign(VariableHandle* h) { owner->assign(this, h); }
 	DataType getType() { return owner->getType(this); }
 	int& asInt() { return owner->asInt(this); }
+	float& asFloat() { return owner->asFloat(this); }
+	bool& asBool() { return owner->asBool(this); }
+	std::string& asString() { return owner->asString(this); }
+
 
 private:
 	VariableHandle(VariableMgr* owner, int index) : owner(owner), index(index) {}

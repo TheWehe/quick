@@ -1,6 +1,6 @@
 #include "ast.hpp"
 
-#include <cassert>
+#include "op.hpp"
 
 
 namespace ast {
@@ -15,9 +15,36 @@ namespace ast {
 		}
 	}
 
+
+	VariableHandle* NullNode::eval(VariableMgr& mgr, Scope& scope) const {
+		return mgr.createNull();
+	}
+
+
 	VariableHandle* IntNode::eval(VariableMgr& mgr, Scope& scope) const {
 		return mgr.createInt(i);
 	}
+
+
+	VariableHandle* FloatNode::eval(VariableMgr& mgr, Scope& scope) const {
+		return mgr.createFloat(f);
+	}
+
+
+	VariableHandle* InfNode::eval(VariableMgr& mgr, Scope& scope) const {
+		return mgr.createPInf();
+	}
+
+
+	VariableHandle* BoolNode::eval(VariableMgr& mgr, Scope& scope) const {
+		return mgr.createBool(b);
+	}
+
+
+	VariableHandle* StringNode::eval(VariableMgr& mgr, Scope& scope) const {
+		return mgr.createString(s);
+	}
+
 
 	VariableHandle* AssignNode::eval(VariableMgr& mgr, Scope& scope) const {
 		auto h1 = a->eval(mgr, scope);
@@ -30,22 +57,156 @@ namespace ast {
 		return mgr.createRef(h1);
 	}
 
+
 	VariableHandle* AddNode::eval(VariableMgr& mgr, Scope& scope) const {
 		auto h1 = a->eval(mgr, scope);
 		auto h2 = b->eval(mgr, scope);
 
-		VariableHandle* h = nullptr;
-
-		if (h1->getType() == DT_INT) {
-			if (h2->getType() == DT_INT) {
-				h = mgr.createInt(h1->asInt() + h2->asInt());
-			}
-		}
+		auto h = op::add(mgr, h1, h2);
 
 		mgr.destroy(h1);
 		mgr.destroy(h2);
 
-		if (h == nullptr) h = mgr.createNull();
+		return h;
+	}
+
+
+	VariableHandle* SubNode::eval(VariableMgr& mgr, Scope& scope) const {
+		auto h1 = a->eval(mgr, scope);
+		auto h2 = b->eval(mgr, scope);
+
+		auto h = op::subtract(mgr, h1, h2);
+
+		mgr.destroy(h1);
+		mgr.destroy(h2);
+
+		return h;
+	}
+
+
+	VariableHandle* MulNode::eval(VariableMgr& mgr, Scope& scope) const {
+		auto h1 = a->eval(mgr, scope);
+		auto h2 = b->eval(mgr, scope);
+
+		auto h = op::multiply(mgr, h1, h2);
+
+		mgr.destroy(h1);
+		mgr.destroy(h2);
+
+		return h;
+	}
+
+
+	VariableHandle* DivNode::eval(VariableMgr& mgr, Scope& scope) const {
+		auto h1 = a->eval(mgr, scope);
+		auto h2 = b->eval(mgr, scope);
+
+		auto h = op::divide(mgr, h1, h2);
+
+		mgr.destroy(h1);
+		mgr.destroy(h2);
+
+		return h;
+	}
+
+
+	VariableHandle* ModNode::eval(VariableMgr& mgr, Scope& scope) const {
+		auto h1 = a->eval(mgr, scope);
+		auto h2 = b->eval(mgr, scope);
+
+		auto h = op::modulo(mgr, h1, h2);
+
+		mgr.destroy(h1);
+		mgr.destroy(h2);
+
+		return h;
+	}
+
+
+	VariableHandle* NegNode::eval(VariableMgr& mgr, Scope& scope) const {
+		auto h1 = n->eval(mgr, scope);
+
+		auto h = op::negate(mgr, h1);
+
+		mgr.destroy(h1);
+
+		return h;
+	}
+
+
+	VariableHandle* EqualNode::eval(VariableMgr& mgr, Scope& scope) const {
+		auto h1 = a->eval(mgr, scope);
+		auto h2 = b->eval(mgr, scope);
+
+		auto h = op::equal(mgr, h1, h2);
+
+		mgr.destroy(h1);
+		mgr.destroy(h2);
+
+		return h;
+	}
+
+
+	VariableHandle* NotEqualNode::eval(VariableMgr& mgr, Scope& scope) const {
+		auto h1 = a->eval(mgr, scope);
+		auto h2 = b->eval(mgr, scope);
+
+		auto h = op::notEqual(mgr, h1, h2);
+
+		mgr.destroy(h1);
+		mgr.destroy(h2);
+
+		return h;
+	}
+
+
+	VariableHandle* LessNode::eval(VariableMgr& mgr, Scope& scope) const {
+		auto h1 = a->eval(mgr, scope);
+		auto h2 = b->eval(mgr, scope);
+
+		auto h = op::less(mgr, h1, h2);
+
+		mgr.destroy(h1);
+		mgr.destroy(h2);
+
+		return h;
+	}
+
+
+	VariableHandle* GreaterNode::eval(VariableMgr& mgr, Scope& scope) const {
+		auto h1 = a->eval(mgr, scope);
+		auto h2 = b->eval(mgr, scope);
+
+		auto h = op::greater(mgr, h1, h2);
+
+		mgr.destroy(h1);
+		mgr.destroy(h2);
+
+		return h;
+	}
+
+
+	VariableHandle* AndNode::eval(VariableMgr& mgr, Scope& scope) const {
+		auto h1 = a->eval(mgr, scope);
+		auto h2 = b->eval(mgr, scope);
+
+		auto h = op::and(mgr, h1, h2);
+
+		mgr.destroy(h1);
+		mgr.destroy(h2);
+
+		return h;
+	}
+
+
+	VariableHandle* OrNode::eval(VariableMgr& mgr, Scope& scope) const {
+		auto h1 = a->eval(mgr, scope);
+		auto h2 = b->eval(mgr, scope);
+
+		auto h = op::or(mgr, h1, h2);
+
+		mgr.destroy(h1);
+		mgr.destroy(h2);
 
 		return h;
 	}

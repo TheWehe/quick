@@ -11,9 +11,14 @@ public:
 private:
 	void accept(TokenType t);
 	
-	ast::NodePtr assignment();
-	ast::NodePtr addition();
-	ast::NodePtr primitive();
+	ast::NodePtr assign();
+	ast::NodePtr logic();
+	ast::NodePtr comp();
+	ast::NodePtr add();
+	ast::NodePtr mul();
+	ast::NodePtr neg();
+	ast::NodePtr paren();
+	ast::NodePtr prim();
 	
 	Tokenizer tok;
 };

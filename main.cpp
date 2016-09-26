@@ -1,4 +1,5 @@
 #include <iostream>
+#include <string>
 #include "variable_mgr.hpp"
 #include "variable_handle.hpp"
 #include "scope.hpp"
@@ -7,20 +8,33 @@
 #include "parser.hpp"
 
 
+void printVariable(VariableHandle* h) {
+	switch (h->getType()) {
+	case DT_NULL: std::cout << "null"; break;
+	case DT_INT: std::cout << "int (" << h->asInt() << ")"; break;
+	case DT_FLOAT: std::cout << "float (" << h->asFloat() << ")"; break;
+	case DT_PINF: std::cout << "inf"; break;
+	case DT_NINF: std::cout << "-inf"; break;
+	case DT_BOOL: std::cout << "bool (" << h->asBool() << ")"; break;
+	case DT_STRING: std::cout << "string (" << h->asString() << ")"; break;
+	}
+}
+
+
 int main() {
 	VariableMgr mgr;
 	Scope scope(mgr, nullptr);
 	Parser parser;
 
-	auto term = parser.parse("x = 5 + 7");
-	mgr.destroy(term->eval(mgr, scope));
-	std::cout << scope.find("x")->asInt() << std::endl;
+	while (true) {
+		std::string input;
+		std::getline(std::cin, input);
 
-	auto term2 = parser.parse("x = x + 8");
-	mgr.destroy(term2->eval(mgr, scope));
-	std::cout << scope.find("x")->asInt() << std::endl;
+		auto r = parser.parse(input)->eval(mgr, scope);
 
-	scope.destroy("x");
-
-	while (true) {}
+		printVariable(r);
+		std::cout << std::endl << std::endl;
+		
+		mgr.destroy(r);
+	}
 }

@@ -31,9 +31,25 @@ void Tokenizer::tokenize(const std::string& code) {
 		}
 
 		switch (curChar) {
+		case '(':
+			nextChar();
+			tokens.push_back(Token(TT_LPAREN));
+			continue;
+
+		case ')':
+			nextChar();
+			tokens.push_back(Token(TT_RPAREN));
+			continue;
+
 		case '=':
 			nextChar();
-			tokens.push_back(Token(TT_EQUAL));
+			if (curChar == '=') {
+				tokens.push_back(Token(TT_DOUBLEEQUAL));
+				nextChar();
+			}
+			else {
+				tokens.push_back(Token(TT_EQUAL));
+			}
 			continue;
 
 		case '+':
@@ -54,6 +70,32 @@ void Tokenizer::tokenize(const std::string& code) {
 		case '/':
 			tokens.push_back(Token(TT_SLASH));
 			nextChar();
+			continue;
+
+		case '%':
+			tokens.push_back(Token(TT_PERCENT));
+			nextChar();
+			continue;
+
+		case '!':
+			nextChar();
+			if (curChar == '=') {
+				tokens.push_back(Token(TT_EXCLEQUAL));
+				nextChar();
+			}
+			else {
+				tokens.push_back(Token(TT_EXCL));
+			}
+			continue;
+
+		case '<':
+			nextChar();
+			tokens.push_back(Token(TT_LESS));
+			continue;
+
+		case '>':
+			nextChar();
+			tokens.push_back(Token(TT_GREATER));
 			continue;
 
 		case '\t':
@@ -105,17 +147,20 @@ void Tokenizer::tokenize(const std::string& code) {
 			if (buffer == "null") {
 				tokens.push_back(Token(TT_NULL));
 			}
-			else if (buffer == "pinf") {
-				tokens.push_back(Token(TT_PINF));
-			}
-			else if (buffer == "ninf") {
-				tokens.push_back(Token(TT_NINF));
+			else if (buffer == "inf") {
+				tokens.push_back(Token(TT_INF));
 			}
 			else if (buffer == "true") {
 				tokens.push_back(Token(true));
 			}
 			else if (buffer == "false") {
 				tokens.push_back(Token(false));
+			}
+			else if (buffer == "and") {
+				tokens.push_back(Token(TT_AND));
+			}
+			else if (buffer == "or") {
+				tokens.push_back(Token(TT_OR));
 			}
 			else {
 				char* s = new char[buffer.size() + 1];
@@ -129,7 +174,7 @@ void Tokenizer::tokenize(const std::string& code) {
 			continue;
 		}
 
-		if (posValid() && isdigit(curChar) && curChar != '0') {
+		if (posValid() && isdigit(curChar)) {
 			std::string buffer;
 
 			while (posValid() && isdigit(curChar)) {

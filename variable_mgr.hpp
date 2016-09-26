@@ -4,10 +4,16 @@
 #include <vector>
 #include <stack>
 #include <list>
+#include <string>
 
 enum DataType {
 	DT_NULL,
 	DT_INT,
+	DT_FLOAT,
+	DT_PINF,
+	DT_NINF,
+	DT_BOOL,
+	DT_STRING,
 	DT_REF
 };
 
@@ -33,6 +39,11 @@ public:
 	
 	VariableHandle* createNull();
 	VariableHandle* createInt(int i);
+	VariableHandle* createFloat(float f);
+	VariableHandle* createPInf();
+	VariableHandle* createNInf();
+	VariableHandle* createBool(bool b);
+	VariableHandle* createString(const std::string& s);
 	VariableHandle* createCopy(VariableHandle* target);
 	VariableHandle* createRef(VariableHandle* target);
 	void destroy(VariableHandle* h);
@@ -44,6 +55,9 @@ private:
 	void assign(VariableHandle* target, VariableHandle* toCopy);
 	DataType getType(VariableHandle* h);
 	int& asInt(VariableHandle* h);
+	float& asFloat(VariableHandle* h);
+	bool& asBool(VariableHandle* h);
+	std::string& asString(VariableHandle* h);
 
 	std::vector<VariableData> dataSlots;
 	std::stack<unsigned> freeSlots;
