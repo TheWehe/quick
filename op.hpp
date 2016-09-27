@@ -13,7 +13,6 @@ namespace op {
 	VariableHandle* negate(VariableMgr& mgr, VariableHandle* h);
 	VariableHandle* equal(VariableMgr& mgr, VariableHandle* a, VariableHandle* b);
 	VariableHandle* notEqual(VariableMgr& mgr, VariableHandle* a, VariableHandle* b);
-	VariableHandle* not(VariableMgr& mgr, VariableHandle* h);
 	VariableHandle* less(VariableMgr& mgr, VariableHandle* a, VariableHandle* b);
 	VariableHandle* greater(VariableMgr& mgr, VariableHandle* a, VariableHandle* b);
 	VariableHandle* and(VariableMgr& mgr, VariableHandle* a, VariableHandle* b);

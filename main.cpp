@@ -8,6 +8,11 @@
 #include "parser.hpp"
 
 
+std::string toString(bool b) {
+	if (b) return "true";
+	else return "false";
+}
+
 void printVariable(VariableHandle* h) {
 	switch (h->getType()) {
 	case DT_NULL: std::cout << "null"; break;
@@ -15,7 +20,7 @@ void printVariable(VariableHandle* h) {
 	case DT_FLOAT: std::cout << "float (" << h->asFloat() << ")"; break;
 	case DT_PINF: std::cout << "inf"; break;
 	case DT_NINF: std::cout << "-inf"; break;
-	case DT_BOOL: std::cout << "bool (" << h->asBool() << ")"; break;
+	case DT_BOOL: std::cout << "bool (" << toString(h->asBool()) << ")"; break;
 	case DT_STRING: std::cout << "string (" << h->asString() << ")"; break;
 	}
 }

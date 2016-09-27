@@ -10,6 +10,15 @@ namespace op {
 		if (h->getType() == DT_INT) {
 			return mgr.createInt(-h->asInt());
 		}
+		if (h->getType() == DT_FLOAT) {
+			return mgr.createFloat(-h->asFloat());
+		}
+		if (h->getType() == DT_PINF) {
+			return mgr.createNInf();
+		}
+		if (h->getType() == DT_NINF) {
+			return mgr.createPInf();
+		}
 
 		return mgr.createNull();
 	}

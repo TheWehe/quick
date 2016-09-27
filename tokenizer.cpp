@@ -84,7 +84,7 @@ void Tokenizer::tokenize(const std::string& code) {
 				nextChar();
 			}
 			else {
-				tokens.push_back(Token(TT_EXCL));
+				assert(false);
 			}
 			continue;
 

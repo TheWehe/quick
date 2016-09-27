@@ -12,6 +12,45 @@ namespace op {
 			if (b->getType() == DT_INT) {
 				return mgr.createBool(a->asInt() == b->asInt());
 			}
+			if (b->getType() == DT_FLOAT) {
+				return mgr.createBool(static_cast<float>(a->asInt()) == b->asFloat());
+			}
+			if (b->getType() == DT_PINF) {
+				return mgr.createBool(false);
+			}
+			if (b->getType() == DT_PINF) {
+				return mgr.createBool(false);
+			}
+		}                                                                                                                                                                                                                                                                                                                                                                                                                                                     
+		if (a->getType() == DT_FLOAT) {
+			if (b->getType() == DT_INT) {
+				return mgr.createBool(a->asFloat() == static_cast<float>(b->asInt()));
+			}
+			if (b->getType() == DT_FLOAT) {
+				return mgr.createBool(a->asFloat() == b->asFloat());
+			}
+			if (b->getType() == DT_PINF) {
+				return mgr.createBool(false);
+			}
+			if (b->getType() == DT_PINF) {
+				return mgr.createBool(false);
+			}
+		}
+		if (a->getType() == DT_PINF) {
+			if (b->getType() == DT_INT) {
+				return mgr.createBool(false);
+			}
+			if (b->getType() == DT_FLOAT) {
+				return mgr.createBool(false);
+			}
+		}
+		if (a->getType() == DT_NINF) {
+			if (b->getType() == DT_INT) {
+				return mgr.createBool(false);
+			}
+			if (b->getType() == DT_FLOAT) {
+				return mgr.createBool(false);
+			}
 		}
 
 		return mgr.createNull();
@@ -26,14 +65,46 @@ namespace op {
 			if (b->getType() == DT_INT) {
 				return mgr.createBool(a->asInt() != b->asInt());
 			}
+			if (b->getType() == DT_FLOAT) {
+				return mgr.createBool(static_cast<float>(a->asInt()) != b->asFloat());
+			}
+			if (b->getType() == DT_PINF) {
+				return mgr.createBool(true);
+			}
+			if (b->getType() == DT_PINF) {
+				return mgr.createBool(true);
+			}
 		}
-
-		return mgr.createNull();
-	}
-
-
-	VariableHandle* not(VariableMgr& mgr, VariableHandle* h) {
-		assert(h != nullptr);
+		if (a->getType() == DT_FLOAT) {
+			if (b->getType() == DT_INT) {
+				return mgr.createBool(a->asFloat() != static_cast<float>(b->asInt()));
+			}
+			if (b->getType() == DT_FLOAT) {
+				return mgr.createBool(a->asFloat() != b->asFloat());
+			}
+			if (b->getType() == DT_PINF) {
+				return mgr.createBool(true);
+			}
+			if (b->getType() == DT_PINF) {
+				return mgr.createBool(true);
+			}
+		}
+		if (a->getType() == DT_PINF) {
+			if (b->getType() == DT_INT) {
+				return mgr.createBool(true);
+			}
+			if (b->getType() == DT_FLOAT) {
+				return mgr.createBool(true);
+			}
+		}
+		if (a->getType() == DT_NINF) {
+			if (b->getType() == DT_INT) {
+				return mgr.createBool(true);
+			}
+			if (b->getType() == DT_FLOAT) {
+				return mgr.createBool(true);
+			}
+		}
 
 		return mgr.createNull();
 	}
@@ -46,6 +117,45 @@ namespace op {
 		if (a->getType() == DT_INT) {
 			if (b->getType() == DT_INT) {
 				return mgr.createBool(a->asInt() < b->asInt());
+			}
+			if (b->getType() == DT_FLOAT) {
+				return mgr.createBool(static_cast<float>(a->asInt()) < b->asFloat());
+			}
+			if (b->getType() == DT_PINF) {
+				return mgr.createBool(true);
+			}
+			if (b->getType() == DT_NINF) {
+				return mgr.createBool(false);
+			}
+		}
+		if (a->getType() == DT_FLOAT) {
+			if (b->getType() == DT_INT) {
+				return mgr.createBool(a->asFloat() < static_cast<float>(b->asInt()));
+			}
+			if (b->getType() == DT_FLOAT) {
+				return mgr.createBool(a->asFloat() < b->asFloat());
+			}
+			if (b->getType() == DT_PINF) {
+				return mgr.createBool(true);
+			}
+			if (b->getType() == DT_NINF) {
+				return mgr.createBool(false);
+			}
+		}
+		if (a->getType() == DT_PINF) {
+			if (b->getType() == DT_INT) {
+				return mgr.createBool(false);
+			}
+			if (b->getType() == DT_FLOAT) {
+				return mgr.createBool(false);
+			}
+		}
+		if (a->getType() == DT_NINF) {
+			if (b->getType() == DT_INT) {
+				return mgr.createBool(true);
+			}
+			if (b->getType() == DT_FLOAT) {
+				return mgr.createBool(true);
 			}
 		}
 
@@ -60,6 +170,45 @@ namespace op {
 		if (a->getType() == DT_INT) {
 			if (b->getType() == DT_INT) {
 				return mgr.createBool(a->asInt() > b->asInt());
+			}
+			if (b->getType() == DT_FLOAT) {
+				return mgr.createBool(static_cast<float>(a->asInt()) > b->asFloat());
+			}
+			if (b->getType() == DT_PINF) {
+				return mgr.createBool(false);
+			}
+			if (b->getType() == DT_NINF) {
+				return mgr.createBool(true);
+			}
+		}
+		if (a->getType() == DT_FLOAT) {
+			if (b->getType() == DT_INT) {
+				return mgr.createBool(a->asFloat() > static_cast<float>(b->asInt()));
+			}
+			if (b->getType() == DT_FLOAT) {
+				return mgr.createBool(a->asFloat() > b->asFloat());
+			}
+			if (b->getType() == DT_PINF) {
+				return mgr.createBool(false);
+			}
+			if (b->getType() == DT_NINF) {
+				return mgr.createBool(true);
+			}
+		}
+		if (a->getType() == DT_PINF) {
+			if (b->getType() == DT_INT) {
+				return mgr.createBool(true);
+			}
+			if (b->getType() == DT_FLOAT) {
+				return mgr.createBool(true);
+			}
+		}
+		if (a->getType() == DT_NINF) {
+			if (b->getType() == DT_INT) {
+				return mgr.createBool(false);
+			}
+			if (b->getType() == DT_FLOAT) {
+				return mgr.createBool(false);
 			}
 		}
 
