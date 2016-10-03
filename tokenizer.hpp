@@ -27,6 +27,11 @@ enum TokenType {
 	TT_GREATER,
 	TT_AND,
 	TT_OR,
+	TT_COMMA,
+	TT_IF,
+	TT_ELSE,
+	TT_ELIF,
+	TT_WHILE,
 	TT_NEWLINE,
 	TT_TAB
 };

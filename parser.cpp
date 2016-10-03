@@ -1,15 +1,87 @@
 #include "parser.hpp"
 
 
-ast::NodePtr Parser::parse(const std::string& code) {
+ast::NodePtr Parser::analyze(const std::string& code) {
 	tok.tokenize(code);
-	auto a = assign();
+	auto r = control(0);
 	accept(TT_NONE);
-	return a;
+	return r;
 }
 
 void Parser::accept(TokenType t) {
 	tok.nextToken();
+}
+
+ast::NodePtr Parser::control(unsigned indentCount) {
+	std::vector<ast::NodePtr> block;
+
+	while (tok.getCurToken().type != TT_NONE) {
+		if (indentCount != 0) {
+			if (tok.getCurToken().type == TT_TAB) {
+				if (tok.getCurToken().i != indentCount) {
+					break;
+				}
+				else {
+					accept(TT_TAB);
+				}
+			}
+			else {
+				break;
+			}
+		}
+
+		if (tok.getCurToken().type == TT_IF) {
+			ast::NodePtr mc, mb, eic, eib, eb;
+			
+			accept(TT_IF);
+			mc = assign();
+			accept(TT_NEWLINE);
+			mb = control(indentCount + 1);
+
+			if (tok.getCurToken().type == TT_TAB) {
+				if (tok.peekToken().type == TT_ELIF) {
+					if (tok.getCurToken().i == indentCount) {
+						accept(TT_TAB);
+					}
+				}
+			}
+			if (tok.getCurToken().type == TT_ELIF) {
+				accept(TT_ELIF);
+				eic = assign();
+				accept(TT_NEWLINE);
+				eib = control(indentCount + 1);
+			}
+
+			if (tok.getCurToken().type == TT_TAB) {
+				if (tok.peekToken().type == TT_ELSE) {
+					if (tok.getCurToken().i == indentCount) {
+						accept(TT_TAB);
+					}
+				}
+			}
+			if (tok.getCurToken().type == TT_ELSE) {
+				accept(TT_ELSE);
+				accept(TT_NEWLINE);
+				eb = control(indentCount + 1);
+			}
+
+			block.push_back(ast::NodePtr(new ast::IfNode(mc, mb, eic, eib, eb)));
+		}
+		else if (tok.getCurToken().type == TT_WHILE) {
+			accept(TT_WHILE);
+			auto c = assign();
+			accept(TT_NEWLINE);
+			auto b = control(indentCount + 1);
+
+			block.push_back(ast::NodePtr(new ast::WhileNode(c, b)));
+		}
+		else {
+			block.push_back(assign());
+			accept(TT_NEWLINE);
+		}
+	}
+
+	return ast::NodePtr(new ast::BlockNode(block));
 }
 
 ast::NodePtr Parser::assign() {
@@ -116,9 +188,8 @@ ast::NodePtr Parser::neg() {
 		accept(TT_MINUS);
 		return ast::NodePtr(new ast::NegNode(paren()));
 	}
-	else {
+
 		return paren();
-	}
 }
 
 ast::NodePtr Parser::paren() {
@@ -140,6 +211,24 @@ ast::NodePtr Parser::prim() {
 	if (tok.getCurToken().type == TT_NAME) {
 		auto t = tok.getCurToken();
 		accept(TT_NAME);
+
+		if (tok.getCurToken().type == TT_LPAREN) {
+			accept(TT_LPAREN);
+
+			std::list<ast::NodePtr> params;
+			if (tok.getCurToken().type != TT_RPAREN) {
+				params.push_back(assign());
+
+				while (tok.getCurToken().type == TT_COMMA) {
+					accept(TT_COMMA);
+					params.push_back(assign());
+				}
+			}
+
+			accept(TT_RPAREN);
+			return ast::NodePtr(new ast::FuncCallNode(t.s, params, fmgr));
+		}
+
 		return ast::NodePtr(new ast::VariableNode(t.s));
 	}
 	if (tok.getCurToken().type == TT_NULL) {

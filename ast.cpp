@@ -1,10 +1,12 @@
 #include "ast.hpp"
 
 #include "op.hpp"
+#include "function_mgr.hpp"
+#include <cassert>
 
 
 namespace ast {
-	VariableHandle* VariableNode::eval(VariableMgr& mgr, Scope& scope) const {
+	VariableHandle* VariableNode::eval(VariableMgr& mgr, Scope& scope, FunctionMgr& fmgr) const {
 		auto h = scope.find(name);
 		if (h != nullptr) {
 			return mgr.createRef(h);
@@ -16,39 +18,57 @@ namespace ast {
 	}
 
 
-	VariableHandle* NullNode::eval(VariableMgr& mgr, Scope& scope) const {
+	VariableHandle* NullNode::eval(VariableMgr& mgr, Scope& scope, FunctionMgr& fmgr) const {
 		return mgr.createNull();
 	}
 
 
-	VariableHandle* IntNode::eval(VariableMgr& mgr, Scope& scope) const {
+	VariableHandle* IntNode::eval(VariableMgr& mgr, Scope& scope, FunctionMgr& fmgr) const {
 		return mgr.createInt(i);
 	}
 
 
-	VariableHandle* FloatNode::eval(VariableMgr& mgr, Scope& scope) const {
+	VariableHandle* FloatNode::eval(VariableMgr& mgr, Scope& scope, FunctionMgr& fmgr) const {
 		return mgr.createFloat(f);
 	}
 
 
-	VariableHandle* InfNode::eval(VariableMgr& mgr, Scope& scope) const {
+	VariableHandle* InfNode::eval(VariableMgr& mgr, Scope& scope, FunctionMgr& fmgr) const {
 		return mgr.createPInf();
 	}
 
 
-	VariableHandle* BoolNode::eval(VariableMgr& mgr, Scope& scope) const {
+	VariableHandle* BoolNode::eval(VariableMgr& mgr, Scope& scope, FunctionMgr& fmgr) const {
 		return mgr.createBool(b);
 	}
 
 
-	VariableHandle* StringNode::eval(VariableMgr& mgr, Scope& scope) const {
+	VariableHandle* StringNode::eval(VariableMgr& mgr, Scope& scope, FunctionMgr& fmgr) const {
 		return mgr.createString(s);
 	}
 
 
-	VariableHandle* AssignNode::eval(VariableMgr& mgr, Scope& scope) const {
-		auto h1 = a->eval(mgr, scope);
-		auto h2 = b->eval(mgr, scope);
+	FuncCallNode::FuncCallNode(const std::string& name, const std::list<ast::NodePtr>& params, FunctionMgr& fmgr)
+	: nodeParams(params) {
+		id = fmgr.findFunc(name);
+	}
+	VariableHandle* FuncCallNode::eval(VariableMgr& mgr, Scope& scope, FunctionMgr& fmgr) const {
+		ParamList pl;
+		for (auto& p : nodeParams) {
+			pl.push_back(p->eval(mgr, scope, fmgr));
+		}
+		
+		auto h = fmgr.call(mgr, id, pl);
+
+		for (auto& p : pl) mgr.destroy(p);
+
+		return h;
+	}
+
+
+	VariableHandle* AssignNode::eval(VariableMgr& mgr, Scope& scope, FunctionMgr& fmgr) const {
+		auto h1 = a->eval(mgr, scope, fmgr);
+		auto h2 = b->eval(mgr, scope, fmgr);
 
 		h1->assign(h2);
 
@@ -58,9 +78,9 @@ namespace ast {
 	}
 
 
-	VariableHandle* AddNode::eval(VariableMgr& mgr, Scope& scope) const {
-		auto h1 = a->eval(mgr, scope);
-		auto h2 = b->eval(mgr, scope);
+	VariableHandle* AddNode::eval(VariableMgr& mgr, Scope& scope, FunctionMgr& fmgr) const {
+		auto h1 = a->eval(mgr, scope, fmgr);
+		auto h2 = b->eval(mgr, scope, fmgr);
 
 		auto h = op::add(mgr, h1, h2);
 
@@ -71,9 +91,9 @@ namespace ast {
 	}
 
 
-	VariableHandle* SubNode::eval(VariableMgr& mgr, Scope& scope) const {
-		auto h1 = a->eval(mgr, scope);
-		auto h2 = b->eval(mgr, scope);
+	VariableHandle* SubNode::eval(VariableMgr& mgr, Scope& scope, FunctionMgr& fmgr) const {
+		auto h1 = a->eval(mgr, scope, fmgr);
+		auto h2 = b->eval(mgr, scope, fmgr);
 
 		auto h = op::subtract(mgr, h1, h2);
 
@@ -84,9 +104,9 @@ namespace ast {
 	}
 
 
-	VariableHandle* MulNode::eval(VariableMgr& mgr, Scope& scope) const {
-		auto h1 = a->eval(mgr, scope);
-		auto h2 = b->eval(mgr, scope);
+	VariableHandle* MulNode::eval(VariableMgr& mgr, Scope& scope, FunctionMgr& fmgr) const {
+		auto h1 = a->eval(mgr, scope, fmgr);
+		auto h2 = b->eval(mgr, scope, fmgr);
 
 		auto h = op::multiply(mgr, h1, h2);
 
@@ -97,9 +117,9 @@ namespace ast {
 	}
 
 
-	VariableHandle* DivNode::eval(VariableMgr& mgr, Scope& scope) const {
-		auto h1 = a->eval(mgr, scope);
-		auto h2 = b->eval(mgr, scope);
+	VariableHandle* DivNode::eval(VariableMgr& mgr, Scope& scope, FunctionMgr& fmgr) const {
+		auto h1 = a->eval(mgr, scope, fmgr);
+		auto h2 = b->eval(mgr, scope, fmgr);
 
 		auto h = op::divide(mgr, h1, h2);
 
@@ -110,9 +130,9 @@ namespace ast {
 	}
 
 
-	VariableHandle* ModNode::eval(VariableMgr& mgr, Scope& scope) const {
-		auto h1 = a->eval(mgr, scope);
-		auto h2 = b->eval(mgr, scope);
+	VariableHandle* ModNode::eval(VariableMgr& mgr, Scope& scope, FunctionMgr& fmgr) const {
+		auto h1 = a->eval(mgr, scope, fmgr);
+		auto h2 = b->eval(mgr, scope, fmgr);
 
 		auto h = op::modulo(mgr, h1, h2);
 
@@ -123,8 +143,8 @@ namespace ast {
 	}
 
 
-	VariableHandle* NegNode::eval(VariableMgr& mgr, Scope& scope) const {
-		auto h1 = n->eval(mgr, scope);
+	VariableHandle* NegNode::eval(VariableMgr& mgr, Scope& scope, FunctionMgr& fmgr) const {
+		auto h1 = n->eval(mgr, scope, fmgr);
 
 		auto h = op::negate(mgr, h1);
 
@@ -134,9 +154,9 @@ namespace ast {
 	}
 
 
-	VariableHandle* EqualNode::eval(VariableMgr& mgr, Scope& scope) const {
-		auto h1 = a->eval(mgr, scope);
-		auto h2 = b->eval(mgr, scope);
+	VariableHandle* EqualNode::eval(VariableMgr& mgr, Scope& scope, FunctionMgr& fmgr) const {
+		auto h1 = a->eval(mgr, scope, fmgr);
+		auto h2 = b->eval(mgr, scope, fmgr);
 
 		auto h = op::equal(mgr, h1, h2);
 
@@ -147,9 +167,9 @@ namespace ast {
 	}
 
 
-	VariableHandle* NotEqualNode::eval(VariableMgr& mgr, Scope& scope) const {
-		auto h1 = a->eval(mgr, scope);
-		auto h2 = b->eval(mgr, scope);
+	VariableHandle* NotEqualNode::eval(VariableMgr& mgr, Scope& scope, FunctionMgr& fmgr) const {
+		auto h1 = a->eval(mgr, scope, fmgr);
+		auto h2 = b->eval(mgr, scope, fmgr);
 
 		auto h = op::notEqual(mgr, h1, h2);
 
@@ -160,9 +180,9 @@ namespace ast {
 	}
 
 
-	VariableHandle* LessNode::eval(VariableMgr& mgr, Scope& scope) const {
-		auto h1 = a->eval(mgr, scope);
-		auto h2 = b->eval(mgr, scope);
+	VariableHandle* LessNode::eval(VariableMgr& mgr, Scope& scope, FunctionMgr& fmgr) const {
+		auto h1 = a->eval(mgr, scope, fmgr);
+		auto h2 = b->eval(mgr, scope, fmgr);
 
 		auto h = op::less(mgr, h1, h2);
 
@@ -173,9 +193,9 @@ namespace ast {
 	}
 
 
-	VariableHandle* GreaterNode::eval(VariableMgr& mgr, Scope& scope) const {
-		auto h1 = a->eval(mgr, scope);
-		auto h2 = b->eval(mgr, scope);
+	VariableHandle* GreaterNode::eval(VariableMgr& mgr, Scope& scope, FunctionMgr& fmgr) const {
+		auto h1 = a->eval(mgr, scope, fmgr);
+		auto h2 = b->eval(mgr, scope, fmgr);
 
 		auto h = op::greater(mgr, h1, h2);
 
@@ -186,9 +206,9 @@ namespace ast {
 	}
 
 
-	VariableHandle* AndNode::eval(VariableMgr& mgr, Scope& scope) const {
-		auto h1 = a->eval(mgr, scope);
-		auto h2 = b->eval(mgr, scope);
+	VariableHandle* AndNode::eval(VariableMgr& mgr, Scope& scope, FunctionMgr& fmgr) const {
+		auto h1 = a->eval(mgr, scope, fmgr);
+		auto h2 = b->eval(mgr, scope, fmgr);
 
 		auto h = op::and(mgr, h1, h2);
 
@@ -199,9 +219,9 @@ namespace ast {
 	}
 
 
-	VariableHandle* OrNode::eval(VariableMgr& mgr, Scope& scope) const {
-		auto h1 = a->eval(mgr, scope);
-		auto h2 = b->eval(mgr, scope);
+	VariableHandle* OrNode::eval(VariableMgr& mgr, Scope& scope, FunctionMgr& fmgr) const {
+		auto h1 = a->eval(mgr, scope, fmgr);
+		auto h2 = b->eval(mgr, scope, fmgr);
 
 		auto h = op::or(mgr, h1, h2);
 
@@ -209,5 +229,59 @@ namespace ast {
 		mgr.destroy(h2);
 
 		return h;
+	}
+
+
+	VariableHandle* BlockNode::eval(VariableMgr& mgr, Scope& scope, FunctionMgr& fmgr) const {
+		Scope child(mgr, &scope);
+		
+		for (auto& x : b) {
+			x->eval(mgr, child, fmgr);
+		}
+
+		return nullptr;
+	}
+
+
+	VariableHandle* IfNode::eval(VariableMgr& mgr, Scope& scope, FunctionMgr& fmgr) const {
+		auto exec = mc->eval(mgr, scope, fmgr);
+		assert(exec->getType() == DT_BOOL);
+
+		if (exec->asBool()) {
+			Scope child(mgr, &scope);
+			mb->eval(mgr, child, fmgr);
+			return nullptr;
+		}
+		if (eic != nullptr) {
+			exec = eic->eval(mgr, scope, fmgr);
+			assert(exec->getType() == DT_BOOL);
+
+			if (exec->asBool()) {
+				Scope child(mgr, &scope);
+				eib->eval(mgr, child, fmgr);
+				return nullptr;
+			}
+		}
+		if (eb != nullptr) {
+			Scope child(mgr, &scope);
+			eb->eval(mgr, child, fmgr);
+		}
+
+		return nullptr;
+	}
+
+
+	VariableHandle* WhileNode::eval(VariableMgr& mgr, Scope& scope, FunctionMgr& fmgr) const {
+		while (true) {
+			auto exec = c->eval(mgr, scope, fmgr);
+			assert(exec->getType() == DT_BOOL);
+
+			if (!exec->asBool()) break;
+
+			Scope child(mgr, &scope);
+			b->eval(mgr, child, fmgr);
+		}
+
+		return nullptr;
 	}
 }

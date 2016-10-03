@@ -98,14 +98,28 @@ void Tokenizer::tokenize(const std::string& code) {
 			tokens.push_back(Token(TT_GREATER));
 			continue;
 
+		case ',':
+			nextChar();
+			tokens.push_back(Token(TT_COMMA));
+			continue;
+
 		case '\t':
-			tokens.push_back(Token(TT_TAB));
+			if (!tokens.empty() && tokens[tokens.size() - 1].type == TT_TAB) {
+				tokens[tokens.size() - 1].i++;
+			}
+			else {
+				tokens.push_back(Token(TT_TAB));
+				tokens[tokens.size() - 1].i = 1;
+			}
 			nextChar();
 			continue;
 
 		case '\n':
 			if (!tokens.empty()) {
-				if (tokens[tokens.size() - 1].type != TT_NEWLINE) {
+				if (tokens[tokens.size() - 1].type == TT_TAB) {
+					tokens.erase(tokens.begin() + tokens.size() - 1);
+				}
+				else if (tokens[tokens.size() - 1].type != TT_NEWLINE) {
 					tokens.push_back(Token(TT_NEWLINE));
 				}
 			}
@@ -161,6 +175,18 @@ void Tokenizer::tokenize(const std::string& code) {
 			}
 			else if (buffer == "or") {
 				tokens.push_back(Token(TT_OR));
+			}
+			else if (buffer == "if") {
+				tokens.push_back(Token(TT_IF));
+			}
+			else if (buffer == "else") {
+				tokens.push_back(Token(TT_ELSE));
+			}
+			else if (buffer == "elif") {
+				tokens.push_back(Token(TT_ELIF));
+			}
+			else if (buffer == "while") {
+				tokens.push_back(Token(TT_WHILE));
 			}
 			else {
 				char* s = new char[buffer.size() + 1];

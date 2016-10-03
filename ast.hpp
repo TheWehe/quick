@@ -7,10 +7,12 @@
 #include "scope.hpp"
 #include "tokenizer.hpp"
 
+class FunctionMgr;
+
 namespace ast {
 	class Node {
 	public:
-		virtual VariableHandle* eval(VariableMgr& mgr, Scope& scope) const = 0;
+		virtual VariableHandle* eval(VariableMgr& mgr, Scope& scope, FunctionMgr& fmgr) const = 0;
 	};
 	using NodePtr = std::shared_ptr<Node>;
 	
@@ -18,7 +20,7 @@ namespace ast {
 	class VariableNode : public Node {
 	public:
 		VariableNode(const std::string& name) : name(name) {}
-		VariableHandle* eval(VariableMgr& mgr, Scope& scope) const override;
+		VariableHandle* eval(VariableMgr& mgr, Scope& scope, FunctionMgr& fmgr) const override;
 		const std::string& getName() const { return name; }
 
 	private:
@@ -28,14 +30,14 @@ namespace ast {
 
 	class NullNode : public Node {
 	public:
-		VariableHandle* eval(VariableMgr& mgr, Scope& scope) const override;
+		VariableHandle* eval(VariableMgr& mgr, Scope& scope, FunctionMgr& fmgr) const override;
 	};
 
 
 	class IntNode : public Node {
 	public:
 		IntNode(int i) : i(i) {}
-		VariableHandle* eval(VariableMgr& mgr, Scope& scope) const override;
+		VariableHandle* eval(VariableMgr& mgr, Scope& scope, FunctionMgr& fmgr) const override;
 	private:
 		int i;
 	};
@@ -44,7 +46,7 @@ namespace ast {
 	class FloatNode : public Node {
 	public:
 		FloatNode(float f) : f(f) {}
-		VariableHandle* eval(VariableMgr& mgr, Scope& scope) const override;
+		VariableHandle* eval(VariableMgr& mgr, Scope& scope, FunctionMgr& fmgr) const override;
 	private:
 		float f;
 	};
@@ -52,14 +54,14 @@ namespace ast {
 
 	class InfNode : public Node {
 	public:
-		VariableHandle* eval(VariableMgr& mgr, Scope& scope) const override;
+		VariableHandle* eval(VariableMgr& mgr, Scope& scope, FunctionMgr& fmgr) const override;
 	};
 
 
 	class BoolNode : public Node {
 	public:
 		BoolNode(bool b) : b(b) {}
-		VariableHandle* eval(VariableMgr& mgr, Scope& scope) const override;
+		VariableHandle* eval(VariableMgr& mgr, Scope& scope, FunctionMgr& fmgr) const override;
 	private:
 		bool b;
 	};
@@ -68,16 +70,26 @@ namespace ast {
 	class StringNode : public Node {
 	public:
 		StringNode(const std::string& s) : s(s) {}
-		VariableHandle* eval(VariableMgr& mgr, Scope& scope) const override;
+		VariableHandle* eval(VariableMgr& mgr, Scope& scope, FunctionMgr& fmgr) const override;
 	private:
 		std::string s;
+	};
+
+
+	class FuncCallNode : public Node {
+	public:
+		FuncCallNode(const std::string& name, const std::list<ast::NodePtr>& params, FunctionMgr& fmgr);
+		VariableHandle* eval(VariableMgr& mgr, Scope& scope, FunctionMgr& fmgr) const override;
+	private:
+		std::list<ast::NodePtr> nodeParams;
+		int id;
 	};
 	
 
 	class AssignNode : public Node {
 	public:
 		AssignNode(const NodePtr& a, const NodePtr& b) : a(a), b(b) {}
-		VariableHandle* eval(VariableMgr& mgr, Scope& scope) const override;
+		VariableHandle* eval(VariableMgr& mgr, Scope& scope, FunctionMgr& fmgr) const override;
 	private:
 		NodePtr a, b;
 	};
@@ -86,7 +98,7 @@ namespace ast {
 	class AddNode : public Node {
 	public:
 		AddNode(const NodePtr& a, const NodePtr& b) : a(a), b(b) {}
-		VariableHandle* eval(VariableMgr& mgr, Scope& scope) const override;
+		VariableHandle* eval(VariableMgr& mgr, Scope& scope, FunctionMgr& fmgr) const override;
 	private:
 		NodePtr a, b;
 	};
@@ -95,7 +107,7 @@ namespace ast {
 	class SubNode : public Node {
 	public:
 		SubNode(const NodePtr& a, const NodePtr& b) : a(a), b(b) {}
-		VariableHandle* eval(VariableMgr& mgr, Scope& scope) const override;
+		VariableHandle* eval(VariableMgr& mgr, Scope& scope, FunctionMgr& fmgr) const override;
 	private:
 		NodePtr a, b;
 	};
@@ -104,7 +116,7 @@ namespace ast {
 	class MulNode : public Node {
 	public:
 		MulNode(const NodePtr& a, const NodePtr& b) : a(a), b(b) {}
-		VariableHandle* eval(VariableMgr& mgr, Scope& scope) const override;
+		VariableHandle* eval(VariableMgr& mgr, Scope& scope, FunctionMgr& fmgr) const override;
 	private:
 		NodePtr a, b;
 	};
@@ -113,7 +125,7 @@ namespace ast {
 	class DivNode : public Node {
 	public:
 		DivNode(const NodePtr& a, const NodePtr& b) : a(a), b(b) {}
-		VariableHandle* eval(VariableMgr& mgr, Scope& scope) const override;
+		VariableHandle* eval(VariableMgr& mgr, Scope& scope, FunctionMgr& fmgr) const override;
 	private:
 		NodePtr a, b;
 	};
@@ -122,7 +134,7 @@ namespace ast {
 	class ModNode : public Node {
 	public:
 		ModNode(const NodePtr& a, const NodePtr& b) : a(a), b(b) {}
-		VariableHandle* eval(VariableMgr& mgr, Scope& scope) const override;
+		VariableHandle* eval(VariableMgr& mgr, Scope& scope, FunctionMgr& fmgr) const override;
 	private:
 		NodePtr a, b;
 	};
@@ -131,7 +143,7 @@ namespace ast {
 	class NegNode : public Node {
 	public:
 		NegNode(const NodePtr& n) : n(n) {}
-		VariableHandle* eval(VariableMgr& mgr, Scope& scope) const override;
+		VariableHandle* eval(VariableMgr& mgr, Scope& scope, FunctionMgr& fmgr) const override;
 	private:
 		NodePtr n;
 	};
@@ -140,7 +152,7 @@ namespace ast {
 	class EqualNode : public Node {
 	public:
 		EqualNode(const NodePtr& a, const NodePtr& b) : a(a), b(b) {}
-		VariableHandle* eval(VariableMgr& mgr, Scope& scope) const override;
+		VariableHandle* eval(VariableMgr& mgr, Scope& scope, FunctionMgr& fmgr) const override;
 	private:
 		NodePtr a, b;
 	};
@@ -149,7 +161,7 @@ namespace ast {
 	class NotEqualNode : public Node {
 	public:
 		NotEqualNode(const NodePtr& a, const NodePtr& b) : a(a), b(b) {}
-		VariableHandle* eval(VariableMgr& mgr, Scope& scope) const override;
+		VariableHandle* eval(VariableMgr& mgr, Scope& scope, FunctionMgr& fmgr) const override;
 	private:
 		NodePtr a, b;
 	};
@@ -158,7 +170,7 @@ namespace ast {
 	class LessNode : public Node {
 	public:
 		LessNode(const NodePtr& a, const NodePtr& b) : a(a), b(b) {}
-		VariableHandle* eval(VariableMgr& mgr, Scope& scope) const override;
+		VariableHandle* eval(VariableMgr& mgr, Scope& scope, FunctionMgr& fmgr) const override;
 	private:
 		NodePtr a, b;
 	};
@@ -167,7 +179,7 @@ namespace ast {
 	class GreaterNode : public Node {
 	public:
 		GreaterNode(const NodePtr& a, const NodePtr& b) : a(a), b(b) {}
-		VariableHandle* eval(VariableMgr& mgr, Scope& scope) const override;
+		VariableHandle* eval(VariableMgr& mgr, Scope& scope, FunctionMgr& fmgr) const override;
 	private:
 		NodePtr a, b;
 	};
@@ -176,7 +188,7 @@ namespace ast {
 	class AndNode : public Node {
 	public:
 		AndNode(const NodePtr& a, const NodePtr& b) : a(a), b(b) {}
-		VariableHandle* eval(VariableMgr& mgr, Scope& scope) const override;
+		VariableHandle* eval(VariableMgr& mgr, Scope& scope, FunctionMgr& fmgr) const override;
 	private:
 		NodePtr a, b;
 	};
@@ -185,9 +197,36 @@ namespace ast {
 	class OrNode : public Node {
 	public:
 		OrNode(const NodePtr& a, const NodePtr& b) : a(a), b(b) {}
-		VariableHandle* eval(VariableMgr& mgr, Scope& scope) const override;
+		VariableHandle* eval(VariableMgr& mgr, Scope& scope, FunctionMgr& fmgr) const override;
 	private:
 		NodePtr a, b;
+	};
+
+	
+	class BlockNode : public Node {
+	public:
+		BlockNode(const std::vector<ast::NodePtr>& b) : b(b) {}
+		VariableHandle* eval(VariableMgr& mgr, Scope& scope, FunctionMgr& fmgr) const override;
+	private:
+		std::vector<ast::NodePtr> b;
+	};
+
+
+	class IfNode : public Node {
+	public:
+		IfNode(const ast::NodePtr& mc, const ast::NodePtr& mb, const ast::NodePtr& eic, const ast::NodePtr& eib, const ast::NodePtr& eb) : mc(mc), mb(mb), eic(eic), eib(eib), eb(eb) {}
+		VariableHandle* eval(VariableMgr& mgr, Scope& scope, FunctionMgr& fmgr) const override;
+	private:
+		ast::NodePtr mc, mb, eic, eib, eb;
+	};
+
+
+	class WhileNode : public Node {
+	public:
+		WhileNode(const ast::NodePtr& c, const ast::NodePtr& b) : c(c), b(b) {}
+		VariableHandle* eval(VariableMgr& mgr, Scope& scope, FunctionMgr& fmgr) const override;
+	private:
+		ast::NodePtr c, b;
 	};
 }
 

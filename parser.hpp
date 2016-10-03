@@ -3,14 +3,18 @@
 
 #include "ast.hpp"
 #include "tokenizer.hpp"
+#include "function_mgr.hpp"
 
 class Parser {
 public:
-	ast::NodePtr parse(const std::string& code);
+	Parser(FunctionMgr& fmgr) : fmgr(fmgr) {}
+	ast::NodePtr analyze(const std::string& code);
 
 private:
 	void accept(TokenType t);
-	
+
+	ast::NodePtr control(unsigned indentCount);
+
 	ast::NodePtr assign();
 	ast::NodePtr logic();
 	ast::NodePtr comp();
@@ -20,6 +24,7 @@ private:
 	ast::NodePtr paren();
 	ast::NodePtr prim();
 	
+	FunctionMgr& fmgr;
 	Tokenizer tok;
 };
 
