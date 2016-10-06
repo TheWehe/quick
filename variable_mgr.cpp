@@ -160,6 +160,14 @@ void VariableMgr::assign(VariableHandle* target, VariableHandle* toCopy) {
 	if (dataSlots[target->index].type == DT_REF) {
 		int refIndex = *static_cast<int*>(dataSlots[target->index].data);
 
+		if (dataSlots[toCopy->index].type == DT_REF) {
+			int otherRefIndex = *static_cast<int*>(dataSlots[toCopy->index].data);
+			
+			if (refIndex == otherRefIndex) {
+				return;
+			}
+		}
+
 		switch (dataSlots[refIndex].type) {
 		case DT_INT: delete static_cast<int*>(dataSlots[refIndex].data); break;
 		case DT_FLOAT: delete static_cast<float*>(dataSlots[refIndex].data); break;
