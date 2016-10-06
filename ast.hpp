@@ -6,6 +6,7 @@
 #include "variable_handle.hpp"
 #include "scope.hpp"
 #include "tokenizer.hpp"
+#include "function_handle.hpp"
 
 class FunctionMgr;
 
@@ -82,7 +83,7 @@ namespace ast {
 		VariableHandle* eval(VariableMgr& mgr, Scope& scope, FunctionMgr& fmgr) const override;
 	private:
 		std::list<ast::NodePtr> nodeParams;
-		int id;
+		FunctionHandle id;
 	};
 	
 
@@ -227,6 +228,14 @@ namespace ast {
 		VariableHandle* eval(VariableMgr& mgr, Scope& scope, FunctionMgr& fmgr) const override;
 	private:
 		ast::NodePtr c, b;
+	};
+
+	class ReturnNode : public Node {
+	public:
+		ReturnNode(const ast::NodePtr& r) : r(r) {}
+		VariableHandle* eval(VariableMgr& mgr, Scope& scope, FunctionMgr& fmgr) const override;
+	private:
+		ast::NodePtr r;
 	};
 }
 

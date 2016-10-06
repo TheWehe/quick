@@ -12,9 +12,11 @@ public:
 
 private:
 	void accept(TokenType t);
-
+	
+	ast::NodePtr func();
 	ast::NodePtr control(unsigned indentCount);
 
+	ast::NodePtr interr();
 	ast::NodePtr assign();
 	ast::NodePtr logic();
 	ast::NodePtr comp();

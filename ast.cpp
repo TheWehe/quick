@@ -2,6 +2,7 @@
 
 #include "op.hpp"
 #include "function_mgr.hpp"
+#include "interrupters.hpp"
 #include <cassert>
 
 
@@ -283,5 +284,9 @@ namespace ast {
 		}
 
 		return nullptr;
+	}
+
+	VariableHandle* ReturnNode::eval(VariableMgr& mgr, Scope& scope, FunctionMgr& fmgr) const {
+		throw ReturnInterruption(r);
 	}
 }

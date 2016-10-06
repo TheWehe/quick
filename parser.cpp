@@ -3,13 +3,56 @@
 
 ast::NodePtr Parser::analyze(const std::string& code) {
 	tok.tokenize(code);
-	auto r = control(0);
+	auto r = func();
 	accept(TT_NONE);
 	return r;
 }
 
 void Parser::accept(TokenType t) {
 	tok.nextToken();
+}
+
+ast::NodePtr Parser::func() {
+	std::vector<ast::NodePtr> block;
+	
+	while (tok.getCurToken().type != TT_NONE) {
+		if (tok.getCurToken().type == TT_FUNC) {
+			accept(TT_FUNC);
+
+			auto t = tok.getCurToken();
+			accept(TT_NAME);
+			accept(TT_LPAREN);
+
+			std::vector<std::string> params;
+			if (tok.getCurToken().type != TT_RPAREN) {
+				params.push_back(tok.getCurToken().s);
+				accept(TT_NAME);
+
+				while (tok.getCurToken().type == TT_COMMA) {
+					accept(TT_COMMA);
+					params.push_back(tok.getCurToken().s);
+					accept(TT_NAME);
+				}
+			}
+
+			accept(TT_RPAREN);
+			accept(TT_NEWLINE);
+
+			auto b = control(1);
+
+			ScriptFunction f;
+			f.name = t.s;
+			f.params = params;
+			f.exec = b;
+
+			fmgr.addScriptFunc(f);
+		}
+		else {
+			block.push_back(control(0));
+		}
+	}
+
+	return ast::NodePtr(new ast::BlockNode(block));
 }
 
 ast::NodePtr Parser::control(unsigned indentCount) {
@@ -76,12 +119,21 @@ ast::NodePtr Parser::control(unsigned indentCount) {
 			block.push_back(ast::NodePtr(new ast::WhileNode(c, b)));
 		}
 		else {
-			block.push_back(assign());
+			block.push_back(interr());
 			accept(TT_NEWLINE);
 		}
 	}
 
 	return ast::NodePtr(new ast::BlockNode(block));
+}
+
+ast::NodePtr Parser::interr() {
+	if (tok.getCurToken().type == TT_RETURN) {
+		accept(TT_RETURN);
+		return ast::NodePtr(new ast::ReturnNode(assign()));
+	}
+
+	return assign();
 }
 
 ast::NodePtr Parser::assign() {

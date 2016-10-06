@@ -188,6 +188,12 @@ void Tokenizer::tokenize(const std::string& code) {
 			else if (buffer == "while") {
 				tokens.push_back(Token(TT_WHILE));
 			}
+			else if (buffer == "function") {
+				tokens.push_back(Token(TT_FUNC));
+			}
+			else if (buffer == "return") {
+				tokens.push_back(Token(TT_RETURN));
+			}
 			else {
 				char* s = new char[buffer.size() + 1];
 				for (unsigned i = 0; i < buffer.size(); i++) {

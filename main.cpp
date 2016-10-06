@@ -2,6 +2,7 @@
 #include <string>
 #include <cassert>
 #include <fstream>
+#include <chrono>
 #include "function_mgr.hpp"
 #include "variable_mgr.hpp"
 #include "variable_handle.hpp"
@@ -74,9 +75,8 @@ int main() {
 	std::ifstream file("test.q");
 	std::string code, temp;
 	while (std::getline(file, temp)) code += temp + "\n";
-
 	auto program = parser.analyze(code);
-	program->eval(mgr, scope, fmgr);
+	mgr.destroy(program->eval(mgr, scope, fmgr));
 
 	while (true);
 }

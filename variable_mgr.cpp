@@ -123,6 +123,8 @@ void VariableMgr::addRef(VariableHandle* target, VariableHandle* ref) {
 }
 
 void VariableMgr::destroyRef(VariableHandle* target, VariableHandle* ref, bool deleteHandle) {
+	if (target == nullptr) return;
+
 	int index = target->index;
 
 	if (target == ref) {

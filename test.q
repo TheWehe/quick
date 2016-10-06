@@ -1,9 +1,7 @@
-i = 0
+function f()
+	return 4
 
-while i < 3
-	if i == 0
-		print("no")
-	else
-		print("si", " monsieur", 6)
-	
-	i = i + 1
+function g(x)
+	return f() * x
+
+print(g(16))

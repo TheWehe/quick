@@ -32,6 +32,8 @@ enum TokenType {
 	TT_ELSE,
 	TT_ELIF,
 	TT_WHILE,
+	TT_FUNC,
+	TT_RETURN,
 	TT_NEWLINE,
 	TT_TAB
 };
