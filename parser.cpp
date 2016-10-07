@@ -132,6 +132,10 @@ ast::NodePtr Parser::interr() {
 		accept(TT_RETURN);
 		return ast::NodePtr(new ast::ReturnNode(assign()));
 	}
+	else if (tok.getCurToken().type == TT_BREAK) {
+		accept(TT_BREAK);
+		return ast::NodePtr(new ast::BreakNode());
+	}
 
 	return assign();
 }

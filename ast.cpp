@@ -279,8 +279,14 @@ namespace ast {
 
 			if (!exec->asBool()) break;
 
-			Scope child(mgr, &scope);
-			b->eval(mgr, child, fmgr);
+			try {
+				Scope child(mgr, &scope);
+				b->eval(mgr, child, fmgr);
+			}
+			catch (const std::exception& e) {
+				if(e.what() == "br") break;
+				else throw e;
+			}
 		}
 
 		return nullptr;
@@ -288,5 +294,9 @@ namespace ast {
 
 	VariableHandle* ReturnNode::eval(VariableMgr& mgr, Scope& scope, FunctionMgr& fmgr) const {
 		throw ReturnInterruption(r);
+	}
+
+	VariableHandle* BreakNode::eval(VariableMgr& mgr, Scope& scope, FunctionMgr& fmgr) const {
+		throw BreakInterruption();
 	}
 }

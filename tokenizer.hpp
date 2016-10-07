@@ -34,6 +34,7 @@ enum TokenType {
 	TT_WHILE,
 	TT_FUNC,
 	TT_RETURN,
+	TT_BREAK,
 	TT_NEWLINE,
 	TT_TAB
 };

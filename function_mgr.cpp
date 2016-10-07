@@ -51,8 +51,14 @@ VariableHandle* FunctionMgr::call(VariableMgr& mgr, const FunctionHandle& h, con
 		try {
 			mgr.destroy(scriptFuncs[h.b].exec->eval(mgr, scope, *this));
 		}
-		catch (const ReturnInterruption& ret) {
-			return ret.getRet()->eval(mgr, scope, *this);
+		catch (const std::exception& e) {
+			if (e.what() == "ret") {
+				auto ret = *static_cast<const ReturnInterruption*>(&e);
+				return ret.getRet()->eval(mgr, scope, *this);
+			}
+			else {
+				throw e;
+			}
 		}
 
 		return mgr.createNull();

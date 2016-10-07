@@ -1,7 +1,10 @@
-function f()
-	return 4
+function f(x)
+	return x
 
-function g(x)
-	return f() * x
-
-print(g(16))
+i = 0
+while i < 3
+	if i == 1
+		print("break")
+		break
+	print(f(i))
+	i = i + 1

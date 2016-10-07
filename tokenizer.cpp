@@ -194,6 +194,9 @@ void Tokenizer::tokenize(const std::string& code) {
 			else if (buffer == "return") {
 				tokens.push_back(Token(TT_RETURN));
 			}
+			else if (buffer == "break") {
+				tokens.push_back(Token(TT_BREAK));
+			}
 			else {
 				char* s = new char[buffer.size() + 1];
 				for (unsigned i = 0; i < buffer.size(); i++) {

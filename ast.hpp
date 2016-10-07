@@ -237,6 +237,11 @@ namespace ast {
 	private:
 		ast::NodePtr r;
 	};
+
+	class BreakNode : public Node {
+	public:
+		VariableHandle* eval(VariableMgr& mgr, Scope& scope, FunctionMgr& fmgr) const override;
+	};
 }
 
 #endif
