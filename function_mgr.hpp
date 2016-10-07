@@ -24,7 +24,7 @@ struct ScriptFunction {
 class FunctionMgr {
 public:
 	void addCFunc(const CFunction& function);
-	void addScriptFunc(const ScriptFunction& function);
+	ScriptFunction* addScriptFunc(const ScriptFunction& function);
 	FunctionHandle findFunc(const std::string& name);
 	VariableHandle* call(VariableMgr& mgr, const FunctionHandle& h, const ParamList& params);
 

@@ -38,14 +38,12 @@ ast::NodePtr Parser::func() {
 			accept(TT_RPAREN);
 			accept(TT_NEWLINE);
 
+			auto f = fmgr.addScriptFunc(ScriptFunction());
+			f->name = t.s;
+			f->params = params;
+
 			auto b = control(1);
-
-			ScriptFunction f;
-			f.name = t.s;
-			f.params = params;
-			f.exec = b;
-
-			fmgr.addScriptFunc(f);
+			f->exec = b;
 		}
 		else {
 			block.push_back(control(0));

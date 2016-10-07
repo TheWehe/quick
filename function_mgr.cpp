@@ -10,8 +10,9 @@ void FunctionMgr::addCFunc(const CFunction& function) {
 	cFuncs.push_back(function);
 }
 
-void FunctionMgr::addScriptFunc(const ScriptFunction& function) {
+ScriptFunction* FunctionMgr::addScriptFunc(const ScriptFunction& function) {
 	scriptFuncs.push_back(function);
+	return &scriptFuncs[scriptFuncs.size() - 1];
 }
 
 FunctionHandle FunctionMgr::findFunc(const std::string& name) {
