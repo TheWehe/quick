@@ -132,7 +132,20 @@ void Tokenizer::tokenize(const std::string& code) {
 			std::string buffer;
 
 			while (posValid() && curChar != '\"' && curChar != '\n') {
-				buffer += curChar;
+				if (curChar == '\\') {
+					nextChar();
+					
+					switch (curChar) {
+					case '\\': buffer += '\\'; break;
+					case '\"': buffer += '\"'; break;
+					case 'n': buffer += '\n'; break;
+					case 't': buffer += '\t'; break;
+					default: assert(false);
+					}
+				}
+				else {
+					buffer += curChar;
+				}
 				nextChar();
 			}
 
