@@ -76,6 +76,7 @@ int main() {
 	std::string code, temp;
 	while (std::getline(file, temp)) code += temp + "\n";
 	auto program = parser.analyze(code);
+	
 	mgr.destroy(program->eval(mgr, scope, fmgr));
 
 	while (true);

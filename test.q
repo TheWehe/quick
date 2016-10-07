@@ -6,4 +6,11 @@ function fak(n)
 function binomk(n, k)
 	return fak(n) / (fak(n - k) * fak(k))
 
-print(binomk(10, 4))
+i = 0
+while i < 1000
+	if i % 2 == 0
+		print(i)
+	else
+		print("urgs")
+	print("\n")
+	i = i + 1

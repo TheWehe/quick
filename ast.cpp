@@ -10,11 +10,11 @@ namespace ast {
 	VariableHandle* VariableNode::eval(VariableMgr& mgr, Scope& scope, FunctionMgr& fmgr) const {
 		auto h = scope.find(name);
 		if (h != nullptr) {
-			return mgr.createRef(h);
+			return h;
 		}
 		else {
 			scope.add(name, mgr.createNull());
-			return mgr.createRef(scope.find(name));
+			return scope.find(name);
 		}
 	}
 
@@ -73,9 +73,12 @@ namespace ast {
 
 		h1->assign(h2);
 
+		auto r =  mgr.createRef(h1);
+
+		mgr.destroy(h1);
 		mgr.destroy(h2);
 
-		return mgr.createRef(h1);
+		return r;
 	}
 
 
@@ -237,7 +240,7 @@ namespace ast {
 		Scope child(mgr, &scope);
 		
 		for (auto& x : b) {
-			x->eval(mgr, child, fmgr);
+			mgr.destroy(x->eval(mgr, child, fmgr));
 		}
 
 		return nullptr;
@@ -250,7 +253,8 @@ namespace ast {
 
 		if (exec->asBool()) {
 			Scope child(mgr, &scope);
-			mb->eval(mgr, child, fmgr);
+			mgr.destroy(mb->eval(mgr, child, fmgr));
+			mgr.destroy(exec);
 			return nullptr;
 		}
 		if (eic != nullptr) {
@@ -259,15 +263,17 @@ namespace ast {
 
 			if (exec->asBool()) {
 				Scope child(mgr, &scope);
-				eib->eval(mgr, child, fmgr);
+				mgr.destroy(eib->eval(mgr, child, fmgr));
+				mgr.destroy(exec);
 				return nullptr;
 			}
 		}
 		if (eb != nullptr) {
 			Scope child(mgr, &scope);
-			eb->eval(mgr, child, fmgr);
+			mgr.destroy(eb->eval(mgr, child, fmgr));
 		}
 
+		mgr.destroy(exec);
 		return nullptr;
 	}
 
@@ -277,11 +283,13 @@ namespace ast {
 			auto exec = c->eval(mgr, scope, fmgr);
 			assert(exec->getType() == DT_BOOL);
 
-			if (!exec->asBool()) break;
+			auto r = exec->asBool();
+			mgr.destroy(exec);
+			if (!r) break;
 
 			try {
 				Scope child(mgr, &scope);
-				b->eval(mgr, child, fmgr);
+				mgr.destroy(b->eval(mgr, child, fmgr));
 			}
 			catch (const std::exception& e) {
 				if(e.what() == "br") break;
