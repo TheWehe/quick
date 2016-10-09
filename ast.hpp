@@ -150,6 +150,15 @@ namespace ast {
 	};
 
 
+	class NotNode : public Node {
+	public:
+		NotNode(const NodePtr& n) : n(n) {}
+		VariableHandle* eval(VariableMgr& mgr, Scope& scope, FunctionMgr& fmgr) const override;
+	private:
+		NodePtr n;
+	};
+
+
 	class EqualNode : public Node {
 	public:
 		EqualNode(const NodePtr& a, const NodePtr& b) : a(a), b(b) {}

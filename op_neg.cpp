@@ -22,4 +22,14 @@ namespace op {
 
 		return mgr.createNull();
 	}
+
+	VariableHandle * not(VariableMgr& mgr, VariableHandle* h) {
+		assert(h != nullptr);
+
+		if (h->getType() == DT_BOOL) {
+			return mgr.createBool(!h->asBool());
+		}
+
+		return mgr.createNull();
+	}
 }

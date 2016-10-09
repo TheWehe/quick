@@ -146,6 +146,31 @@ ast::NodePtr Parser::assign() {
 		auto b = logic();
 		return ast::NodePtr(new ast::AssignNode(a, b));
 	}
+	else if (tok.getCurToken().type == TT_PLUSEQUAL) {
+		accept(TT_PLUSEQUAL);
+		auto b = logic();
+		return ast::NodePtr(new ast::AssignNode(a, ast::NodePtr(new ast::AddNode(a, b))));
+	}
+	else if (tok.getCurToken().type == TT_MINUSEQUAL) {
+		accept(TT_MINUSEQUAL);
+		auto b = logic();
+		return ast::NodePtr(new ast::AssignNode(a, ast::NodePtr(new ast::SubNode(a, b))));
+	}
+	else if (tok.getCurToken().type == TT_STAREQUAL) {
+		accept(TT_STAREQUAL);
+		auto b = logic();
+		return ast::NodePtr(new ast::AssignNode(a, ast::NodePtr(new ast::MulNode(a, b))));
+	}
+	else if (tok.getCurToken().type == TT_SLASHEQUAL) {
+		accept(TT_SLASHEQUAL);
+		auto b = logic();
+		return ast::NodePtr(new ast::AssignNode(a, ast::NodePtr(new ast::DivNode(a, b))));
+	}
+	else if (tok.getCurToken().type == TT_PERCENTEQUAL) {
+		accept(TT_PERCENTEQUAL);
+		auto b = logic();
+		return ast::NodePtr(new ast::AssignNode(a, ast::NodePtr(new ast::ModNode(a, b))));
+	}
 
 	return a;
 }
@@ -173,7 +198,9 @@ ast::NodePtr Parser::comp() {
 	while (tok.getCurToken().type == TT_DOUBLEEQUAL ||
 		tok.getCurToken().type == TT_EXCLEQUAL ||
 		tok.getCurToken().type == TT_LESS ||
-		tok.getCurToken().type == TT_GREATER) {
+		tok.getCurToken().type == TT_LESSEQUAL ||
+		tok.getCurToken().type == TT_GREATER ||
+		tok.getCurToken().type == TT_GREATEREQUAL) {
 
 		if (tok.getCurToken().type == TT_DOUBLEEQUAL) {
 			accept(TT_DOUBLEEQUAL);
@@ -187,9 +214,19 @@ ast::NodePtr Parser::comp() {
 			accept(TT_LESS);
 			r = ast::NodePtr(new ast::LessNode(r, add()));
 		}
-		else {
+		else if (tok.getCurToken().type == TT_LESSEQUAL) {
+			accept(TT_LESSEQUAL);
+			auto b = add();
+			r = ast::NodePtr(new ast::OrNode(ast::NodePtr(new ast::LessNode(r, b)), ast::NodePtr(new ast::EqualNode(r, b))));
+		}
+		else if(tok.getCurToken().type == TT_GREATER) {
 			accept(TT_GREATER);
 			r = ast::NodePtr(new ast::GreaterNode(r, add()));
+		}
+		else if (tok.getCurToken().type == TT_GREATEREQUAL) {
+			accept(TT_GREATEREQUAL);
+			auto b = add();
+			r = ast::NodePtr(new ast::OrNode(ast::NodePtr(new ast::GreaterNode(r, b)), ast::NodePtr(new ast::EqualNode(r, b))));
 		}
 	}
 
@@ -242,8 +279,12 @@ ast::NodePtr Parser::neg() {
 		accept(TT_MINUS);
 		return ast::NodePtr(new ast::NegNode(paren()));
 	}
+	else if (tok.getCurToken().type == TT_EXCL) {
+		accept(TT_EXCL);
+		return ast::NodePtr(new ast::NotNode(paren()));
+	}
 
-		return paren();
+	return paren();
 }
 
 ast::NodePtr Parser::paren() {

@@ -53,49 +53,90 @@ void Tokenizer::tokenize(const std::string& code) {
 			continue;
 
 		case '+':
-			tokens.push_back(Token(TT_PLUS));
 			nextChar();
+			if (curChar == '=') {
+				tokens.push_back(Token(TT_PLUSEQUAL));
+				nextChar();
+			}
+			else {
+				tokens.push_back(Token(TT_PLUS));
+			}
 			continue;
 
 		case '-':
-			tokens.push_back(Token(TT_MINUS));
 			nextChar();
+			if (curChar == '=') {
+				tokens.push_back(Token(TT_MINUSEQUAL));
+				nextChar();
+			}
+			else {
+				tokens.push_back(Token(TT_MINUS));
+			}
 			continue;
 
 		case '*':
-			tokens.push_back(Token(TT_STAR));
 			nextChar();
+			if (curChar == '=') {
+				tokens.push_back(Token(TT_STAREQUAL));
+				nextChar();
+			}
+			else {
+				tokens.push_back(Token(TT_STAR));
+			}
 			continue;
 
 		case '/':
-			tokens.push_back(Token(TT_SLASH));
 			nextChar();
+			if (curChar == '=') {
+				tokens.push_back(Token(TT_SLASHEQUAL));
+				nextChar();
+			}
+			else {
+				tokens.push_back(Token(TT_SLASH));
+			}
 			continue;
 
 		case '%':
-			tokens.push_back(Token(TT_PERCENT));
 			nextChar();
+			if (curChar == '=') {
+				tokens.push_back(Token(TT_PERCENTEQUAL));
+				nextChar();
+			}
+			else {
+				tokens.push_back(Token(TT_PERCENT));
+			}
 			continue;
 
 		case '!':
 			nextChar();
 			if (curChar == '=') {
 				tokens.push_back(Token(TT_EXCLEQUAL));
-				nextChar();
 			}
 			else {
-				assert(false);
+				tokens.push_back(Token(TT_EXCL));
 			}
 			continue;
 
 		case '<':
 			nextChar();
-			tokens.push_back(Token(TT_LESS));
+			if (curChar == '=') {
+				tokens.push_back(Token(TT_LESSEQUAL));
+				nextChar();
+			}
+			else {
+				tokens.push_back(Token(TT_LESS));
+			}
 			continue;
 
 		case '>':
 			nextChar();
-			tokens.push_back(Token(TT_GREATER));
+			if (curChar == '=') {
+				tokens.push_back(Token(TT_GREATEREQUAL));
+				nextChar();
+			}
+			else {
+				tokens.push_back(Token(TT_GREATER));
+			}
 			continue;
 
 		case ',':

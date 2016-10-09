@@ -11,6 +11,7 @@ namespace op {
 	VariableHandle* divide(VariableMgr& mgr, VariableHandle* a, VariableHandle* b);
 	VariableHandle* modulo(VariableMgr& mgr, VariableHandle* a, VariableHandle* b);
 	VariableHandle* negate(VariableMgr& mgr, VariableHandle* h);
+	VariableHandle* not(VariableMgr& mgr, VariableHandle* h);
 	VariableHandle* equal(VariableMgr& mgr, VariableHandle* a, VariableHandle* b);
 	VariableHandle* notEqual(VariableMgr& mgr, VariableHandle* a, VariableHandle* b);
 	VariableHandle* less(VariableMgr& mgr, VariableHandle* a, VariableHandle* b);

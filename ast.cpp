@@ -158,6 +158,17 @@ namespace ast {
 	}
 
 
+	VariableHandle* NotNode::eval(VariableMgr& mgr, Scope& scope, FunctionMgr& fmgr) const {
+		auto h1 = n->eval(mgr, scope, fmgr);
+
+		auto h = op::not(mgr, h1);
+
+		mgr.destroy(h1);
+
+		return h;
+	}
+
+
 	VariableHandle* EqualNode::eval(VariableMgr& mgr, Scope& scope, FunctionMgr& fmgr) const {
 		auto h1 = a->eval(mgr, scope, fmgr);
 		auto h2 = b->eval(mgr, scope, fmgr);
